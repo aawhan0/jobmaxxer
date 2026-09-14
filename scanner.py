@@ -11,11 +11,7 @@ logger = logging.getLogger("jobmaxxer")
 
 
 def run(companies_path: str, profile_path: str, db_path: str) -> int:
-    companies = [
-        item
-        for item in load_json(companies_path).get("companies", [])
-        if item.get("enabled", True)
-    ]
+    companies = [item for item in load_json(companies_path).get("companies", []) if item.get("enabled", True)]
     profile = load_json(profile_path)
     store = Store(db_path)
     failures = 0
@@ -26,12 +22,8 @@ def run(companies_path: str, profile_path: str, db_path: str) -> int:
         for company in companies:
             name = company["name"]
             url = company["career_url"]
-            adapter = company.get("adapter", "html")
-            logger.info("Scanning %s", name)
-
             try:
-                if adapter != "html":
-                    raise ValueError(f"Unsupported adapter in core scanner: {adapter}")
+                logger.info("Scanning %s", name)
                 jobs = scan_html_company(name, url)
                 discovered += len(jobs)
                 matches = rank_matches(jobs, profile)
@@ -39,7 +31,6 @@ def run(companies_path: str, profile_path: str, db_path: str) -> int:
                 ranked_unseen = rank_matches(unseen, profile)
                 new_matches += len(ranked_unseen)
                 store.record_scan(name, True, len(jobs))
-
                 for result in ranked_unseen:
                     print("\nNEW MATCH")
                     print(f"Company: {result.job.company}")
