@@ -1,0 +1,11 @@
+{
+  "companies": [
+    {
+      "name": "REPLACE_WITH_COMPANY",
+      "career_url": "https://example.com/careers",
+      "adapter": "html",
+      "enabled": true,
+      "locations": ["India", "Remote"]
+    }
+  ]
+}

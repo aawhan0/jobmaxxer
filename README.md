@@ -2,24 +2,44 @@
 
 Personal, cost-free job monitoring for entry-level AI/backend/software roles.
 
-## Goals
+## Current stage
 
-- Scan public company career pages and ATS endpoints.
-- Normalize jobs into a common schema.
-- Filter for entry-level AI/backend/platform opportunities.
-- Persist seen jobs locally with SQLite.
-- Report scan failures instead of hiding them.
-- Send new matches to Telegram later.
-- Run locally on Windows with Task Scheduler.
+The core scanner foundation is ready in the first feature PR:
 
-## Current status
+- JSON-based company and candidate configuration
+- Generic public HTML career-page adapter
+- Normalized job model
+- Entry-level relevance scoring
+- Seniority and experience exclusions
+- SQLite persistence and first-seen deduplication
+- Per-company scan failure recording
+- Command-line runner
+- Tests for matching and persistence
 
-Core scanner foundation is implemented in the first feature PR.
+## Run locally
 
-## Cost
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python scanner.py
+```
 
-Designed for personal use at INR 0/month. No paid API, hosting, VPS, domain, or database is required.
+Replace the placeholder company in `config/companies.json` with a real public career page before scanning.
+
+## Planned next stages
+
+1. Configure all 46 real companies.
+2. Add ATS-specific adapters where public endpoints exist.
+3. Improve job parsing, location extraction, deduplication, and matching.
+4. Add Telegram notifications.
+5. Add Windows Task Scheduler setup.
+6. Add optional LinkedIn alert-email/referral intake without automated LinkedIn messaging or login.
 
 ## Safety
 
-This project does not auto-apply to jobs, automate LinkedIn messaging, or perform automated LinkedIn login/scraping.
+JobMaxxer does not auto-apply to jobs, automate LinkedIn messaging, perform automated LinkedIn login, or use aggressive LinkedIn scraping.
+
+## Cost
+
+The intended deployment is local-only at INR 0/month: no paid API, VPS, hosted database, domain, or paid scraping service.

@@ -1,0 +1,8 @@
+{
+  "target_roles": ["AI Engineer", "Generative AI Engineer", "Applied AI Engineer", "AI Backend Engineer", "Python Backend Engineer", "Backend Software Engineer", "AI/ML Software Engineer", "RAG Engineer", "LLM Evaluation Engineer", "AI Reliability Engineer", "ML Platform Engineer", "ML Infrastructure Engineer", "Junior MLOps Engineer", "Developer Tools Engineer", "Platform Engineer", "Full-Stack Engineer", "AI Solutions Engineer", "Technical Implementation Engineer"],
+  "skills": ["Python", "FastAPI", "PostgreSQL", "Redis", "Docker", "RAG", "GenAI", "LLM", "LLM evaluation", "model serving", "backend", "ML platform", "AI infrastructure", "MLOps"],
+  "preferred_locations": ["India", "Remote"],
+  "max_years_experience": 2,
+  "exclude_keywords": ["senior", "staff", "principal", "lead", "manager", "director", "architect", "head of", "vice president", "vp ", "10+ years", "8+ years", "7+ years", "6+ years", "5+ years", "4+ years", "3+ years"],
+  "entry_keywords": ["entry level", "entry-level", "graduate", "junior", "associate", "trainee", "fresher", "new grad", "new graduate", "0-2 years", "0 to 2 years", "1-2 years", "0-1 years", "1 year", "no experience", "early career"]
+}
