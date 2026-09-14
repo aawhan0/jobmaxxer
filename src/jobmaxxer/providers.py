@@ -1,56 +1,28 @@
-import re
-from urllib.parse import urlparse
-
-import requests
-
-from .models import Job
+"""Provider-aware job ingestion helpers."""
+from __future__ import annotations
+from typing import Any, Iterable
+from urllib.parse import urlparse, urlunparse
 from .ats import detect_ats
-from .adapters import DEFAULT_HEADERS, parse_generic_html
+from .models import Job
 
+def normalize_url(url: str) -> str:
+    p = urlparse(url.strip())
+    return urlunparse((p.scheme.lower(), p.netloc.lower(), p.path.rstrip('/'), '', p.query, ''))
 
-def _board_slug(url: str) -> str | None:
-    path = urlparse(url).path.strip('/').split('/')
-    for marker in ('boards', 'companies'):
-        if marker in path:
-            index = path.index(marker)
-            if index + 1 < len(path):
-                return path[index + 1]
-    return None
+def _job(company: str, item: dict[str, Any], source: str) -> Job:
+    location = item.get('location') or item.get('locations') or item.get('workplace_type') or ''
+    if isinstance(location, list): location = ', '.join(map(str, location))
+    url = normalize_url(str(item.get('url') or item.get('absolute_url') or item.get('apply_url') or ''))
+    return Job(company=company, title=str(item.get('title') or item.get('name') or 'Untitled role').strip(), location=str(location), url=url, source=source, description=str(item.get('description') or item.get('content') or ''), external_id=str(item.get('id') or item.get('requisition_id') or url))
 
-
-def _json(url: str, timeout: int) -> object:
-    response = requests.get(url, headers=DEFAULT_HEADERS, timeout=timeout)
-    response.raise_for_status()
-    return response.json()
-
-
-def scan_greenhouse(company: str, url: str, timeout: int = 20) -> list[Job]:
-    slug = _board_slug(url)
-    if not slug:
-        raise ValueError('Greenhouse board slug not found')
-    data = _json(f'https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true', timeout)
-    return [_job(company, url, item, 'greenhouse') for item in data.get('jobs', [])]
-
-
-def scan_lever(company: str, url: str, timeout: int = 20) -> list[Job]:
-    slug = _board_slug(url)
-    if not slug:
-        raise ValueError('Lever board slug not found')
-    data = _json(f'https://api.lever.co/v0/postings/{slug}?mode=json', timeout)
-    return [_job(company, url, item, 'lever') for item in data]
-
-
-def _job(company: str, source: str, item: dict, provider: str) -> Job:
-    location = item.get('location') or item.get('location', {}).get('name', '') if isinstance(item.get('location'), dict) else item.get('location', '')
-    description = item.get('content') or item.get('descriptionPlain') or item.get('description') or ''
-    link = item.get('absolute_url') or item.get('hostedUrl') or item.get('applyUrl') or item.get('url') or source
-    return Job(company=company, title=item.get('title', '').strip(), location=str(location), url=link, source=source, description=description, external_id=str(item.get('id', '')))
-
-
-def scan_company(company: str, url: str, adapter: str | None = None, timeout: int = 20) -> list[Job]:
-    provider = adapter or detect_ats(url)
-    if provider == 'greenhouse':
-        return scan_greenhouse(company, url, timeout)
-    if provider == 'lever':
-        return scan_lever(company, url, timeout)
-    return parse_generic_html(company, url, __import__('src.jobmaxxer.adapters', fromlist=['fetch_html']).fetch_html(url, timeout))
+def parse_greenhouse_payload(company: str, payload: dict[str, Any]) -> list[Job]: return [_job(company, x, 'greenhouse') for x in payload.get('jobs', []) if isinstance(x, dict)]
+def parse_lever_payload(company: str, payload: list[dict[str, Any]]) -> list[Job]: return [_job(company, x, 'lever') for x in payload if isinstance(x, dict)]
+def parse_ashby_payload(company: str, payload: dict[str, Any]) -> list[Job]: return [_job(company, x, 'ashby') for x in payload.get('jobs', []) if isinstance(x, dict)]
+def parse_workable_payload(company: str, payload: dict[str, Any]) -> list[Job]: return [_job(company, x, 'workable') for x in payload.get('jobs', []) if isinstance(x, dict)]
+def parse_workday_payload(company: str, payload: dict[str, Any]) -> list[Job]: return [_job(company, x, 'workday') for x in (payload.get('jobPostings') or payload.get('jobs') or payload.get('data') or []) if isinstance(x, dict)]
+def provider_for(url: str, adapter: str | None = None) -> str: return (adapter or detect_ats(url) or 'html').lower()
+def deduplicate(jobs: Iterable[Job]) -> list[Job]:
+    seen, result = set(), []
+    for job in jobs:
+        if job.fingerprint not in seen: seen.add(job.fingerprint); result.append(job)
+    return result
