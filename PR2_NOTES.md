@@ -1,0 +1,1 @@
+PR #2 implements the first ingestion milestone: local profile configuration, SQLite-backed deduplication, scan-run failure recording, CLI output helpers, tests, and local run documentation.
