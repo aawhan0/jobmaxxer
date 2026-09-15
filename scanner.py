@@ -16,9 +16,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(
 logger = logging.getLogger("jobmaxxer")
 
 
-def run(companies_path: str, profile_path: str, db_path: str, export: str | None = None, sources_path: str = "config/sources.json") -> int:
+def run(companies_path: str, profile_path: str, db_path: str, export: str | None = None, sources_path: str | None = None) -> int:
     companies = [item for item in load_json(companies_path).get("companies", []) if item.get("enabled", True)]
-    sources = [item for item in load_json(sources_path).get("sources", []) if item.get("enabled", True)]
+    sources = []
+    if sources_path is not None:
+        sources = [item for item in load_json(sources_path).get("sources", []) if item.get("enabled", True)]
     profile = load_json(profile_path)
     store = Store(db_path)
     failures = discovered = new_matches = 0
