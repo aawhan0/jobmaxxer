@@ -9,22 +9,22 @@
     },
     {
       "name": "Scale AI",
-      "career_url": "https://jobs.lever.co/scaleai",
-      "adapter": "lever",
+      "career_url": "https://job-boards.greenhouse.io/scaleai",
+      "adapter": "greenhouse",
       "enabled": true,
       "locations": ["India", "Remote", "United States"]
     },
     {
       "name": "Anduril",
-      "career_url": "https://jobs.lever.co/anduril",
-      "adapter": "lever",
+      "career_url": "https://job-boards.greenhouse.io/andurilindustries",
+      "adapter": "greenhouse",
       "enabled": true,
       "locations": ["Remote", "United States"]
     },
     {
       "name": "Notion",
-      "career_url": "https://jobs.lever.co/notion",
-      "adapter": "lever",
+      "career_url": "https://job-boards.greenhouse.io/notion",
+      "adapter": "greenhouse",
       "enabled": true,
       "locations": ["Remote", "United States"]
     }
