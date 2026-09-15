@@ -15,4 +15,6 @@ The scanner reads `config/companies.json` and `config/profile.json`, stores fing
 
 For troubleshooting, `python scanner.py --diagnostics` prints filtering and storage counts by source, including relevant jobs that were already seen.
 
+When Telegram credentials are configured, new matches are sent as an actionable digest containing the role, location, score, matching reasons, and application link. See `docs/notification-digest.md` for details.
+
 No applications, messages, or LinkedIn actions are automated.
