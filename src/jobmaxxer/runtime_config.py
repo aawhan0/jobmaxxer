@@ -13,7 +13,7 @@ class RuntimeConfig:
     profile_path: Path
     db_path: Path
     log_path: Path
-    sources_path: Path
+    sources_path: Path = Path("config/sources.json")
 
     @classmethod
     def from_env(cls) -> "RuntimeConfig":
@@ -26,7 +26,7 @@ class RuntimeConfig:
         )
 
     def validate(self) -> None:
-        for path in (self.companies_path, self.profile_path, self.sources_path):
+        for path in (self.companies_path, self.profile_path):
             if not path.is_file():
                 raise FileNotFoundError(f"Required configuration file not found: {path}")
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
