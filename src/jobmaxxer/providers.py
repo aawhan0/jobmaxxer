@@ -23,7 +23,8 @@ def _job(company: str, item: dict[str, Any], source: str) -> Job:
     if isinstance(location, list):
         location = ', '.join(map(str, location))
     url = normalize_url(str(item.get('url') or item.get('absolute_url') or item.get('apply_url') or ''))
-    return Job(company=company, title=str(item.get('title') or item.get('name') or 'Untitled role').strip(), location=str(location), url=url, source=source, description=str(item.get('description') or item.get('content') or ''), external_id=str(item.get('id') or item.get('requisition_id') or url))
+    title = item.get('title') or item.get('name') or item.get('position') or 'Untitled role'
+    return Job(company=company, title=str(title).strip(), location=str(location), url=url, source=source, description=str(item.get('description') or item.get('content') or item.get('description_html') or ''), external_id=str(item.get('id') or item.get('requisition_id') or url))
 
 
 def parse_greenhouse_payload(company: str, payload: dict[str, Any]) -> list[Job]:
