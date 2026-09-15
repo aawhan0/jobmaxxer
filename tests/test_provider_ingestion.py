@@ -1,6 +1,9 @@
 from unittest.mock import patch
 
+import pytest
+
 from src.jobmaxxer.providers import scan_company
+from src.jobmaxxer.scan_errors import ScanError
 
 
 def test_greenhouse_scan_uses_structured_endpoint():
@@ -13,9 +16,5 @@ def test_greenhouse_scan_uses_structured_endpoint():
 
 
 def test_unsupported_provider_fails_clearly():
-    try:
+    with pytest.raises(ScanError, match="workday"):
         scan_company("Example", "https://jobs.example.com/careers", "workday")
-    except ValueError as exc:
-        assert "workday" in str(exc)
-    else:
-        raise AssertionError("Expected unsupported provider error")

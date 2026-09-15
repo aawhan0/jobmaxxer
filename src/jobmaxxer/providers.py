@@ -5,9 +5,11 @@ import json
 from typing import Any, Iterable
 from urllib.parse import urlparse, urlunparse
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
 
 from .ats import detect_ats
 from .models import Job
+from .scan_errors import ScanError
 
 
 def normalize_url(url: str) -> str:
@@ -58,8 +60,15 @@ def deduplicate(jobs: Iterable[Job]) -> list[Job]:
 
 def _fetch_json(url: str, timeout: int = 20) -> Any:
     request = Request(url, headers={'User-Agent': 'jobmaxxer/1.0', 'Accept': 'application/json'})
-    with urlopen(request, timeout=timeout) as response:
-        return json.loads(response.read().decode('utf-8'))
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            return json.loads(response.read().decode('utf-8'))
+    except HTTPError as exc:
+        raise ScanError(f'Provider returned HTTP {exc.code} for {url}') from exc
+    except URLError as exc:
+        raise ScanError(f'Provider request failed for {url}: {exc.reason}') from exc
+    except (TimeoutError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise ScanError(f'Provider response was invalid for {url}: {exc}') from exc
 
 
 def _slug(url: str) -> str:
@@ -68,11 +77,11 @@ def _slug(url: str) -> str:
 
 
 def scan_company(company: str, url: str, adapter: str | None = None, timeout: int = 20) -> list[Job]:
-    """Fetch jobs from a supported ATS, with a clear error for unsupported APIs."""
+    """Fetch jobs from a supported ATS, with recoverable provider errors."""
     provider = provider_for(url, adapter)
     slug = _slug(url)
     if provider == 'greenhouse':
         return parse_greenhouse_payload(company, _fetch_json(f'https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true', timeout))
     if provider == 'lever':
         return parse_lever_payload(company, _fetch_json(f'https://api.lever.co/v0/postings/{slug}?mode=json', timeout))
-    raise ValueError(f'No structured API adapter configured for provider: {provider}')
+    raise ScanError(f'No structured API adapter configured for provider: {provider}')
