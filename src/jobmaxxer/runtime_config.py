@@ -13,6 +13,7 @@ class RuntimeConfig:
     profile_path: Path
     db_path: Path
     log_path: Path
+    sources_path: Path = Path("config/sources.json")
 
     @classmethod
     def from_env(cls) -> "RuntimeConfig":
@@ -21,6 +22,7 @@ class RuntimeConfig:
             Path(os.getenv("JOBMAXXER_PROFILE_PATH", "config/profile.json")),
             Path(os.getenv("JOBMAXXER_DB_PATH", "data/jobmaxxer.db")),
             Path(os.getenv("JOBMAXXER_LOG_PATH", "logs/scan.log")),
+            Path(os.getenv("JOBMAXXER_SOURCES_PATH", "config/sources.json")),
         )
 
     def validate(self) -> None:
