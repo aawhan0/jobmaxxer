@@ -1,10 +1,124 @@
 {
   "sources": [
     {
-      "name": "GitHub Careers",
-      "type": "html",
-      "url": "https://github.com/about/careers",
-      "enabled": true,
+      "name": "Naukri AI Jobs",
+      "provider": "naukri",
+      "type": "search",
+      "url": "https://www.naukri.com",
+      "enabled": false,
+      "queries": ["AI Engineer", "Generative AI Engineer", "Python Developer", "Machine Learning Engineer", "Backend Engineer"],
+      "locations": ["India", "Remote", "Bengaluru", "Hyderabad", "Pune", "Gurugram", "Noida"],
+      "max_pages": 3,
+      "request_delay_seconds": 2
+    },
+    {
+      "name": "Internshala AI Jobs",
+      "provider": "internshala",
+      "type": "search",
+      "url": "https://internshala.com",
+      "enabled": false,
+      "queries": ["artificial intelligence", "machine learning", "python", "backend development", "generative ai"],
+      "locations": ["Work from home", "Bengaluru", "Hyderabad", "Pune", "Delhi", "Mumbai"],
+      "max_pages": 3,
+      "request_delay_seconds": 2
+    },
+    {
+      "name": "Wellfound AI Jobs",
+      "provider": "wellfound",
+      "type": "search",
+      "url": "https://wellfound.com",
+      "enabled": false,
+      "queries": ["AI Engineer", "Machine Learning Engineer", "Backend Engineer", "Full Stack Engineer"],
+      "locations": ["Remote", "India"],
+      "max_pages": 3,
+      "request_delay_seconds": 2
+    },
+    {
+      "name": "LinkedIn Jobs",
+      "provider": "linkedin",
+      "type": "search",
+      "url": "https://www.linkedin.com/jobs",
+      "enabled": false,
+      "queries": ["AI Engineer", "Generative AI", "Python Developer", "Backend Engineer"],
+      "locations": ["India", "Remote"],
+      "max_pages": 2,
+      "request_delay_seconds": 3
+    },
+    {
+      "name": "Indeed India",
+      "provider": "indeed",
+      "type": "search",
+      "url": "https://in.indeed.com",
+      "enabled": false,
+      "queries": ["AI Engineer", "Machine Learning Engineer", "Python Developer", "Backend Engineer"],
+      "locations": ["India", "Remote"],
+      "max_pages": 3,
+      "request_delay_seconds": 2
+    },
+    {
+      "name": "Cutshort",
+      "provider": "cutshort",
+      "type": "search",
+      "url": "https://cutshort.io",
+      "enabled": false,
+      "queries": ["AI Engineer", "Python", "Backend", "Machine Learning"],
+      "locations": ["India", "Remote"],
+      "max_pages": 3,
+      "request_delay_seconds": 2
+    },
+    {
+      "name": "Hirist",
+      "provider": "hirist",
+      "type": "search",
+      "url": "https://www.hirist.tech",
+      "enabled": false,
+      "queries": ["AI", "Machine Learning", "Python", "Backend"],
+      "locations": ["India", "Remote"],
+      "max_pages": 3,
+      "request_delay_seconds": 2
+    },
+    {
+      "name": "Foundit",
+      "provider": "foundit",
+      "type": "search",
+      "url": "https://www.foundit.in",
+      "enabled": false,
+      "queries": ["AI Engineer", "Python Developer", "Machine Learning Engineer"],
+      "locations": ["India", "Remote"],
+      "max_pages": 3,
+      "request_delay_seconds": 2
+    },
+    {
+      "name": "Instahyre",
+      "provider": "instahyre",
+      "type": "search",
+      "url": "https://www.instahyre.com",
+      "enabled": false,
+      "queries": ["AI Engineer", "Backend Engineer", "Python Developer"],
+      "locations": ["India", "Remote"],
+      "max_pages": 2,
+      "request_delay_seconds": 3
+    },
+    {
+      "name": "Remote OK",
+      "provider": "remoteok",
+      "type": "search",
+      "url": "https://remoteok.com",
+      "enabled": false,
+      "queries": ["ai", "machine learning", "python", "backend"],
+      "locations": ["Remote"],
+      "max_pages": 3,
+      "request_delay_seconds": 2
+    },
+    {
+      "name": "We Work Remotely",
+      "provider": "weworkremotely",
+      "type": "search",
+      "url": "https://weworkremotely.com",
+      "enabled": false,
+      "queries": ["AI", "Python", "Backend", "Full Stack"],
+      "locations": ["Remote"],
+      "max_pages": 3,
       "request_delay_seconds": 2
     }
   ]
