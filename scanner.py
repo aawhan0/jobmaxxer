@@ -5,6 +5,7 @@ from pathlib import Path
 from src.jobmaxxer.providers import scan_company
 from src.jobmaxxer.config import load_json
 from src.jobmaxxer.filtering import rank_matches
+from src.jobmaxxer.diagnostics import summarize_filtering
 from src.jobmaxxer.reporting import export_jobs
 from src.jobmaxxer.cli import format_match, output_path
 from src.jobmaxxer.notifications import format_digest
@@ -16,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(
 logger = logging.getLogger("jobmaxxer")
 
 
-def run(companies_path: str, profile_path: str, db_path: str, export: str | None = None, sources_path: str | None = None) -> int:
+def run(companies_path: str, profile_path: str, db_path: str, export: str | None = None, sources_path: str | None = None, diagnostics: bool = False) -> int:
     companies = [item for item in load_json(companies_path).get("companies", []) if item.get("enabled", True)]
     sources = []
     if sources_path is not None:
@@ -25,6 +26,7 @@ def run(companies_path: str, profile_path: str, db_path: str, export: str | None
     store = Store(db_path)
     failures = discovered = new_matches = 0
     all_matches = []
+    diagnostic_counts = {}
     try:
         for company in companies + sources:
             name, url = company["name"], company.get("career_url", company.get("url"))
@@ -32,6 +34,8 @@ def run(companies_path: str, profile_path: str, db_path: str, export: str | None
                 logger.info("Scanning %s", name)
                 jobs = scan_company(name, url, company.get("adapter", company.get("type")))
                 discovered += len(jobs)
+                if diagnostics:
+                    diagnostic_counts[name] = summarize_filtering(jobs, profile)
                 ranked = rank_matches(jobs, profile)
                 unseen_jobs = store.add_jobs(result.job for result in ranked)
                 ranked_unseen = rank_matches(unseen_jobs, profile)
@@ -46,6 +50,10 @@ def run(companies_path: str, profile_path: str, db_path: str, export: str | None
                 logger.exception("Failed to scan %s", name)
     finally:
         store.close()
+    if diagnostics:
+        print("\nFILTER DIAGNOSTICS")
+        for name, counts in diagnostic_counts.items():
+            print(f"{name}: {counts}")
     if export:
         export_jobs(all_matches, output_path(export))
     telegram = TelegramConfig.from_env()
@@ -68,10 +76,11 @@ def main() -> int:
     parser.add_argument("--profile", default=str(defaults.profile_path))
     parser.add_argument("--db", default=str(defaults.db_path))
     parser.add_argument("--export", help="Write new matches to a .json or .csv file")
+    parser.add_argument("--diagnostics", action="store_true", help="Print filtering counts by source")
     args = parser.parse_args()
     config = RuntimeConfig(Path(args.companies), Path(args.profile), Path(args.db), defaults.log_path, Path(args.sources))
     config.validate()
-    return run(args.companies, args.profile, args.db, args.export, args.sources)
+    return run(args.companies, args.profile, args.db, args.export, args.sources, args.diagnostics)
 
 
 if __name__ == "__main__":
