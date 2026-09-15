@@ -1,10 +1,10 @@
 {
   "sources": [
     {
-      "name": "Example public careers page",
+      "name": "GitHub Careers",
       "type": "html",
-      "url": "https://example.com/careers",
-      "enabled": false,
+      "url": "https://github.com/about/careers",
+      "enabled": true,
       "request_delay_seconds": 2
     }
   ]
