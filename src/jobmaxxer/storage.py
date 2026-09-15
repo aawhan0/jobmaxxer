@@ -47,6 +47,9 @@ class Store:
         ).fetchone()
         return row is not None
 
+    def count_seen(self, jobs: Iterable[Job]) -> int:
+        return sum(1 for job in jobs if self.seen(job))
+
     def upsert_job(self, job: Job) -> bool:
         is_new = not self.seen(job)
         self._connection.execute(
