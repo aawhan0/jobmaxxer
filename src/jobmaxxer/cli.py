@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from .models import MatchResult
 
 
@@ -12,3 +14,12 @@ def format_match(result: MatchResult) -> str:
         f"Source: {job.source}",
         f"Apply: {job.url}",
     ])
+
+
+def output_path(value: str | None) -> Path | None:
+    if not value:
+        return None
+    path = Path(value)
+    if path.suffix.lower() not in {".json", ".csv"}:
+        raise ValueError("Export path must end in .json or .csv")
+    return path
