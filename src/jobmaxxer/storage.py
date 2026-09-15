@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
@@ -42,8 +43,7 @@ class Store:
 
     def seen(self, job: Job) -> bool:
         row = self._connection.execute(
-            "SELECT 1 FROM jobs WHERE fingerprint = ?",
-            (job.fingerprint,),
+            "SELECT 1 FROM jobs WHERE fingerprint = ?", (job.fingerprint,)
         ).fetchone()
         return row is not None
 
@@ -67,16 +67,8 @@ class Store:
                 external_id = excluded.external_id,
                 last_seen_at = CURRENT_TIMESTAMP
             """,
-            (
-                job.fingerprint,
-                job.company,
-                job.title,
-                job.location,
-                job.url,
-                job.source,
-                job.description,
-                job.external_id,
-            ),
+            (job.fingerprint, job.company, job.title, job.location, job.url,
+             job.source, job.description, job.external_id),
         )
         self._connection.commit()
         return is_new
@@ -94,3 +86,14 @@ class Store:
             if self.upsert_job(job):
                 new_jobs.append(job)
         return new_jobs
+
+    def jobs_not_seen_since(self, since: datetime, company: str | None = None) -> list[Job]:
+        """Return stored jobs not observed since the supplied UTC timestamp."""
+        timestamp = since.astimezone(timezone.utc).replace(tzinfo=None).isoformat(sep=" ")
+        query = "SELECT * FROM jobs WHERE last_seen_at < ?"
+        params: list[str] = [timestamp]
+        if company is not None:
+            query += " AND company = ?"
+            params.append(company)
+        rows = self._connection.execute(query, params).fetchall()
+        return [Job(row["company"], row["title"], row["location"], row["url"], row["source"], row["description"], row["external_id"]) for row in rows]
