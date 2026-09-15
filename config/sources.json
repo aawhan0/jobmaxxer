@@ -25,9 +25,9 @@
     {
       "name": "Wellfound AI Jobs",
       "provider": "wellfound",
-      "type": "search",
-      "url": "https://wellfound.com",
-      "enabled": false,
+      "type": "html",
+      "url": "https://wellfound.com/jobs",
+      "enabled": true,
       "queries": ["AI Engineer", "Machine Learning Engineer", "Backend Engineer", "Full Stack Engineer"],
       "locations": ["Remote", "India"],
       "max_pages": 3,
