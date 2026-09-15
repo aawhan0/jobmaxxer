@@ -24,7 +24,7 @@ def run(companies_path: str, profile_path: str, db_path: str, export: str | None
         sources = [item for item in load_json(sources_path).get("sources", []) if item.get("enabled", True)]
     profile = load_json(profile_path)
     store = Store(db_path)
-    failures = discovered = new_matches = 0
+    failures = discovered = relevant_matches = new_matches = already_seen = 0
     all_matches = []
     diagnostic_counts = {}
     try:
@@ -35,11 +35,13 @@ def run(companies_path: str, profile_path: str, db_path: str, export: str | None
                 jobs = scan_company(name, url, company.get("adapter", company.get("type")))
                 discovered += len(jobs)
                 ranked = rank_matches(jobs, profile)
+                relevant_matches += len(ranked)
                 if diagnostics:
                     diagnostic_counts[name] = summarize_filtering(jobs, profile)
                     diagnostic_counts[name]["already_seen"] = store.count_seen(result.job for result in ranked)
                 unseen_jobs = store.add_jobs(result.job for result in ranked)
                 ranked_unseen = rank_matches(unseen_jobs, profile)
+                already_seen += len(ranked) - len(ranked_unseen)
                 all_matches.extend(ranked_unseen)
                 new_matches += len(ranked_unseen)
                 store.record_scan(name, True, len(jobs))
@@ -65,7 +67,7 @@ def run(companies_path: str, profile_path: str, db_path: str, export: str | None
         except Exception:
             logger.exception("Telegram delivery failed")
             failures += 1
-    print(f"\nSCAN SUMMARY\nCompanies configured: {len(companies) + len(sources)}\nJobs discovered: {discovered}\nNew relevant jobs: {new_matches}\nFailed companies: {failures}")
+    print(f"\nSCAN SUMMARY\nCompanies configured: {len(companies) + len(sources)}\nJobs discovered: {discovered}\nRelevant jobs found: {relevant_matches}\nAlready seen: {already_seen}\nNew relevant jobs: {new_matches}\nFailed companies: {failures}")
     return 1 if failures else 0
 
 
