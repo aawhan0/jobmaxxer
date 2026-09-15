@@ -23,9 +23,9 @@
     },
     {
       "name": "Notion",
-      "career_url": "https://job-boards.greenhouse.io/notion",
+      "career_url": "https://boards.greenhouse.io/notion",
       "adapter": "greenhouse",
-      "enabled": true,
+      "enabled": false,
       "locations": ["Remote", "United States"]
     }
   ]
