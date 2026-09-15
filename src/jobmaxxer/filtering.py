@@ -4,6 +4,29 @@ from typing import Any
 from .models import Job, MatchResult
 
 
+TECHNICAL_TITLE_KEYWORDS = (
+    "software",
+    "engineer",
+    "developer",
+    "backend",
+    "frontend",
+    "full stack",
+    "full-stack",
+    "data scientist",
+    "data engineer",
+    "machine learning",
+    "ai ",
+    "artificial intelligence",
+    "ml ",
+    "platform",
+    "devops",
+    "infrastructure",
+    "research",
+    "qa engineer",
+    "automation engineer",
+)
+
+
 def _contains_any(text: str, keywords: list[str]) -> list[str]:
     lowered = text.lower()
     return [keyword for keyword in keywords if keyword.lower() in lowered]
@@ -14,6 +37,11 @@ def _experience_years(text: str) -> list[int]:
     for match in re.findall(r"(?<!\d)(\d+)\s*\+?\s*years?", text.lower()):
         values.append(int(match))
     return values
+
+
+def _technical_title(title: str) -> bool:
+    lowered = title.lower()
+    return any(keyword in lowered for keyword in TECHNICAL_TITLE_KEYWORDS)
 
 
 def match_job(job: Job, profile: dict[str, Any]) -> MatchResult | None:
@@ -32,10 +60,13 @@ def match_job(job: Job, profile: dict[str, Any]) -> MatchResult | None:
     entry_hits = _contains_any(combined, profile.get("entry_keywords", []))
     location_hits = _contains_any(job.location, profile.get("preferred_locations", []))
 
-    score = len(role_hits) * 5 + len(skill_hits) * 2 + len(entry_hits) * 3 + len(location_hits) * 2
-
-    if not role_hits and not skill_hits:
+    # A skill mention alone is not enough: unrelated roles often mention
+    # Python, AI, or LLMs in their descriptions. Require either a target role
+    # or a clearly technical title before accepting a match.
+    if not role_hits and not (skill_hits and _technical_title(job.title)):
         return None
+
+    score = len(role_hits) * 5 + len(skill_hits) * 2 + len(entry_hits) * 3 + len(location_hits) * 2
 
     reasons: list[str] = []
     if role_hits:
