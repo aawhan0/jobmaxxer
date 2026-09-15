@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import time
 from typing import Any, Iterable
 from urllib.parse import urlparse, urlunparse
 from urllib.request import Request, urlopen
@@ -64,17 +65,21 @@ def deduplicate(jobs: Iterable[Job]) -> list[Job]:
     return result
 
 
-def _fetch_json(url: str, timeout: int = 20) -> Any:
+def _fetch_json(url: str, timeout: int = 20, retries: int = 2, retry_delay: float = 1.0) -> Any:
     request = Request(url, headers={'User-Agent': 'jobmaxxer/1.0', 'Accept': 'application/json'})
-    try:
-        with urlopen(request, timeout=timeout) as response:
-            return json.loads(response.read().decode('utf-8'))
-    except HTTPError as exc:
-        raise ScanError(f'Provider returned HTTP {exc.code} for {url}') from exc
-    except URLError as exc:
-        raise ScanError(f'Provider request failed for {url}: {exc.reason}') from exc
-    except (TimeoutError, json.JSONDecodeError, UnicodeDecodeError) as exc:
-        raise ScanError(f'Provider response was invalid for {url}: {exc}') from exc
+    for attempt in range(retries + 1):
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                return json.loads(response.read().decode('utf-8'))
+        except HTTPError as exc:
+            raise ScanError(f'Provider returned HTTP {exc.code} for {url}') from exc
+        except (URLError, TimeoutError, OSError) as exc:
+            if attempt == retries:
+                raise ScanError(f'Provider request failed for {url}: {exc}') from exc
+            time.sleep(retry_delay * (attempt + 1))
+        except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise ScanError(f'Provider response was invalid for {url}: {exc}') from exc
+    raise ScanError(f'Provider request failed for {url}')
 
 
 def _slug(url: str) -> str:
@@ -91,7 +96,7 @@ def scan_company(company: str, url: str, adapter: str | None = None, timeout: in
     if provider == 'lever':
         return parse_lever_payload(company, _fetch_json(f'https://api.lever.co/v0/postings/{slug}?mode=json', timeout))
     if provider == 'remoteok':
-        return parse_remoteok_payload(company, _fetch_json('https://remoteok.com/api', timeout))
+        return parse_remoteok_payload(company, _fetch_json('https://remoteok.com/api', max(timeout, 30)))
     if provider == 'html':
         return scan_html_company(company, url, timeout=timeout)
     raise ScanError(f'No structured API adapter configured for provider: {provider}')
