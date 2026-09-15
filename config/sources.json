@@ -102,7 +102,7 @@
     {
       "name": "Remote OK",
       "provider": "remoteok",
-      "type": "search",
+      "type": "remoteok",
       "url": "https://remoteok.com",
       "enabled": true,
       "queries": ["ai", "machine learning", "python", "backend"],
