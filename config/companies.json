@@ -1,11 +1,32 @@
 {
   "companies": [
     {
-      "name": "REPLACE_WITH_COMPANY",
-      "career_url": "https://example.com/careers",
-      "adapter": "html",
+      "name": "Anthropic",
+      "career_url": "https://boards.greenhouse.io/anthropic",
+      "adapter": "greenhouse",
       "enabled": true,
-      "locations": ["India", "Remote"]
+      "locations": ["India", "Remote", "United States"]
+    },
+    {
+      "name": "Scale AI",
+      "career_url": "https://jobs.lever.co/scaleai",
+      "adapter": "lever",
+      "enabled": true,
+      "locations": ["India", "Remote", "United States"]
+    },
+    {
+      "name": "Anduril",
+      "career_url": "https://jobs.lever.co/anduril",
+      "adapter": "lever",
+      "enabled": true,
+      "locations": ["Remote", "United States"]
+    },
+    {
+      "name": "Notion",
+      "career_url": "https://jobs.lever.co/notion",
+      "adapter": "lever",
+      "enabled": true,
+      "locations": ["Remote", "United States"]
     }
   ]
 }
