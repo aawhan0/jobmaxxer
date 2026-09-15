@@ -8,6 +8,7 @@ from src.jobmaxxer.reporting import export_jobs
 from src.jobmaxxer.cli import format_match, output_path
 from src.jobmaxxer.notifications import format_digest
 from src.jobmaxxer.telegram import TelegramConfig, send_message
+from src.jobmaxxer.runtime_config import RuntimeConfig
 from src.jobmaxxer.storage import Store
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
@@ -57,11 +58,14 @@ def run(companies_path: str, profile_path: str, db_path: str, export: str | None
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Personal job scanner")
-    parser.add_argument("--companies", default="config/companies.json")
-    parser.add_argument("--profile", default="config/profile.json")
-    parser.add_argument("--db", default="jobmaxxer.db")
+    defaults = RuntimeConfig.from_env()
+    parser.add_argument("--companies", default=str(defaults.companies_path))
+    parser.add_argument("--profile", default=str(defaults.profile_path))
+    parser.add_argument("--db", default=str(defaults.db_path))
     parser.add_argument("--export", help="Write new matches to a .json or .csv file")
     args = parser.parse_args()
+    config = RuntimeConfig(args.companies, args.profile, args.db, defaults.log_path)
+    config.validate()
     return run(args.companies, args.profile, args.db, args.export)
 
 
