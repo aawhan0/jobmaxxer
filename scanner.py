@@ -16,18 +16,19 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(
 logger = logging.getLogger("jobmaxxer")
 
 
-def run(companies_path: str, profile_path: str, db_path: str, export: str | None = None) -> int:
+def run(companies_path: str, profile_path: str, db_path: str, export: str | None = None, sources_path: str = "config/sources.json") -> int:
     companies = [item for item in load_json(companies_path).get("companies", []) if item.get("enabled", True)]
+    sources = [item for item in load_json(sources_path).get("sources", []) if item.get("enabled", True)]
     profile = load_json(profile_path)
     store = Store(db_path)
     failures = discovered = new_matches = 0
     all_matches = []
     try:
-        for company in companies:
-            name, url = company["name"], company["career_url"]
+        for company in companies + sources:
+            name, url = company["name"], company.get("career_url", company.get("url"))
             try:
                 logger.info("Scanning %s", name)
-                jobs = scan_company(name, url, company.get("adapter"))
+                jobs = scan_company(name, url, company.get("adapter", company.get("type")))
                 discovered += len(jobs)
                 ranked = rank_matches(jobs, profile)
                 unseen_jobs = store.add_jobs(result.job for result in ranked)
@@ -53,7 +54,7 @@ def run(companies_path: str, profile_path: str, db_path: str, export: str | None
         except Exception:
             logger.exception("Telegram delivery failed")
             failures += 1
-    print(f"\nSCAN SUMMARY\nCompanies configured: {len(companies)}\nJobs discovered: {discovered}\nNew relevant jobs: {new_matches}\nFailed companies: {failures}")
+    print(f"\nSCAN SUMMARY\nCompanies configured: {len(companies) + len(sources)}\nJobs discovered: {discovered}\nNew relevant jobs: {new_matches}\nFailed companies: {failures}")
     return 1 if failures else 0
 
 
@@ -61,13 +62,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Personal job scanner")
     defaults = RuntimeConfig.from_env()
     parser.add_argument("--companies", default=str(defaults.companies_path))
+    parser.add_argument("--sources", default=str(defaults.sources_path))
     parser.add_argument("--profile", default=str(defaults.profile_path))
     parser.add_argument("--db", default=str(defaults.db_path))
     parser.add_argument("--export", help="Write new matches to a .json or .csv file")
     args = parser.parse_args()
-    config = RuntimeConfig(Path(args.companies), Path(args.profile), Path(args.db), defaults.log_path)
+    config = RuntimeConfig(Path(args.companies), Path(args.profile), Path(args.db), defaults.log_path, Path(args.sources))
     config.validate()
-    return run(args.companies, args.profile, args.db, args.export)
+    return run(args.companies, args.profile, args.db, args.export, args.sources)
 
 
 if __name__ == "__main__":
