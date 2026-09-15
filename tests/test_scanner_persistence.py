@@ -3,14 +3,7 @@ from src.jobmaxxer.storage import Store
 
 
 def make_job(title: str) -> Job:
-    return Job(
-        company="Example",
-        title=title,
-        location="Remote",
-        url=f"https://example.com/{title.lower().replace(' ', '-')}",
-        source="greenhouse",
-        description="AI backend role",
-    )
+    return Job(company="Example", title=title, location="Remote", url=f"https://example.com/{title.lower().replace(' ', '-')}", source="greenhouse", description="AI backend role")
 
 
 def test_first_scan_returns_new_jobs(tmp_path):
