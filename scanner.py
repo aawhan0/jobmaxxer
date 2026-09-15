@@ -1,5 +1,6 @@
 import argparse
 import logging
+from pathlib import Path
 
 from src.jobmaxxer.providers import scan_company
 from src.jobmaxxer.config import load_json
@@ -64,7 +65,7 @@ def main() -> int:
     parser.add_argument("--db", default=str(defaults.db_path))
     parser.add_argument("--export", help="Write new matches to a .json or .csv file")
     args = parser.parse_args()
-    config = RuntimeConfig(args.companies, args.profile, args.db, defaults.log_path)
+    config = RuntimeConfig(Path(args.companies), Path(args.profile), Path(args.db), defaults.log_path)
     config.validate()
     return run(args.companies, args.profile, args.db, args.export)
 
