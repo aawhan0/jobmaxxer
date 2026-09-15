@@ -104,10 +104,10 @@
       "provider": "remoteok",
       "type": "search",
       "url": "https://remoteok.com",
-      "enabled": false,
+      "enabled": true,
       "queries": ["ai", "machine learning", "python", "backend"],
       "locations": ["Remote"],
-      "max_pages": 3,
+      "max_pages": 1,
       "request_delay_seconds": 2
     },
     {
