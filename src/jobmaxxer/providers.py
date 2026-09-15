@@ -10,6 +10,7 @@ from urllib.error import HTTPError, URLError
 from .ats import detect_ats
 from .models import Job
 from .scan_errors import ScanError
+from .adapters import scan_html_company
 
 
 def normalize_url(url: str) -> str:
@@ -84,4 +85,6 @@ def scan_company(company: str, url: str, adapter: str | None = None, timeout: in
         return parse_greenhouse_payload(company, _fetch_json(f'https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true', timeout))
     if provider == 'lever':
         return parse_lever_payload(company, _fetch_json(f'https://api.lever.co/v0/postings/{slug}?mode=json', timeout))
+    if provider == 'html':
+        return scan_html_company(company, url, timeout=timeout)
     raise ScanError(f'No structured API adapter configured for provider: {provider}')
