@@ -6,6 +6,8 @@ from src.jobmaxxer.config import load_json
 from src.jobmaxxer.filtering import rank_matches
 from src.jobmaxxer.reporting import export_jobs
 from src.jobmaxxer.cli import format_match, output_path
+from src.jobmaxxer.notifications import format_digest
+from src.jobmaxxer.telegram import TelegramConfig, send_message
 from src.jobmaxxer.storage import Store
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
@@ -41,6 +43,14 @@ def run(companies_path: str, profile_path: str, db_path: str, export: str | None
         store.close()
     if export:
         export_jobs(all_matches, output_path(export))
+    telegram = TelegramConfig.from_env()
+    if telegram and all_matches:
+        try:
+            send_message(format_digest(all_matches), telegram)
+            logger.info("Sent %s new matches to Telegram", len(all_matches))
+        except Exception:
+            logger.exception("Telegram delivery failed")
+            failures += 1
     print(f"\nSCAN SUMMARY\nCompanies configured: {len(companies)}\nJobs discovered: {discovered}\nNew relevant jobs: {new_matches}\nFailed companies: {failures}")
     return 1 if failures else 0
 
